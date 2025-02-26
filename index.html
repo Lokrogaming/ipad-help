@@ -1,1 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPad FAQ - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 800px; }
+        .card { margin-top: 20px; }
+        .admin-panel { background: #343a40; color: white; padding: 20px; border-radius: 10px; display: none; }
+    </style>
+</head>
+<body class="container mt-4">
+    <h1 class="text-center text-primary">📱 iPad FAQ</h1>
+    
+    <div class="mb-3">
+        <label for="questionSelect" class="form-label">Wählen Sie eine Frage:</label>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                Frage auswählen
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="questionSelect"></ul>
+        </div>
+    </div>
+    
+    <div id="answer" class="alert alert-info">Wählen Sie eine Frage, um die Antwort zu sehen.</div>
+    
+    <div class="mt-4">
+        <h2 class="text-secondary">Kein passendes Problem gefunden?</h2>
+        <textarea id="customIssue" class="form-control" placeholder="Beschreiben Sie Ihr Problem..."></textarea>
+        <button onclick="submitIssue()" class="btn btn-primary mt-2">Absenden</button>
+    </div>
+    
+    <button onclick="showAdminPanel()" class="btn btn-dark mt-4">Admin Login</button>
+    
+    <div class="admin-panel mt-5" id="adminPanel">
+        <h2>🔧 Admin Panel</h2>
+        <p>Gelöste Probleme: <span id="solvedCount">0</span></p>
+        <canvas id="statsChart"></canvas>
+    </div>
+    
+    <script>
+        const questions = [
+            { question: "Wie setze ich mein iPad zurück?", answer: "Gehe zu Einstellungen > Allgemein > Zurücksetzen." },
+            { question: "Wie installiere ich Apps?", answer: "Öffne den App Store und suche nach der gewünschten App." },
+            { question: "Warum verbindet sich mein iPad nicht mit WLAN?", answer: "Überprüfe dein WLAN-Passwort und starte den Router neu." },
+            { question: "Wie aktiviere ich den Dark Mode?", answer: "Einstellungen > Anzeige & Helligkeit > Dunkel." },
+            { question: "Wie mache ich einen Screenshot?", answer: "Drücke gleichzeitig die Home-Taste und die Power-Taste." }
+        ];
+        
+        let solvedCount = 0;
+        const stats = {};
+        
+        function populateQuestions() {
+            const dropdown = document.getElementById("questionSelect");
+            questions.forEach(q => {
+                const item = document.createElement("li");
+                const link = document.createElement("a");
+                link.className = "dropdown-item";
+                link.href = "#";
+                link.textContent = q.question;
+                link.onclick = () => showAnswer(q);
+                item.appendChild(link);
+                dropdown.appendChild(item);
+            });
+        }
+        
+        function showAnswer(selectedQuestion) {
+            document.getElementById("answer").textContent = selectedQuestion.answer;
+            stats[selectedQuestion.question] = (stats[selectedQuestion.question] || 0) + 1;
+            updateChart();
+        }
+        
+        function submitIssue() {
+            const issue = document.getElementById("customIssue").value.trim();
+            if (issue) {
+                alert("Wir werden uns mit Ihrem Problem befassen.");
+                solvedCount++;
+                document.getElementById("solvedCount").textContent = solvedCount;
+                document.getElementById("customIssue").value = "";
+            }
+        }
+        
+        function updateChart() {
+            const ctx = document.getElementById("statsChart").getContext("2d");
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: Object.keys(stats),
+                    datasets: [{
+                        label: "Anzahl Anfragen",
+                        data: Object.values(stats),
+                        backgroundColor: "rgba(75, 192, 192, 0.6)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+        
+        function showAdminPanel() {
+            const password = prompt("Bitte geben Sie das Admin-Passwort ein:");
+            if (password === "admin123") {
+                document.getElementById("adminPanel").style.display = "block";
+            } else {
+                alert("Falsches Passwort!");
+            }
+        }
+        
+        populateQuestions();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 
