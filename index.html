@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPad FAQ</title>
+    <title>iPad FAQ - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -11,8 +11,8 @@
         .container { max-width: 800px; }
         .card { margin-top: 20px; }
         .admin-panel { background: #343a40; color: white; padding: 20px; border-radius: 10px; display: none; }
-        .contacts { background: transparent; display: none; }
-        .helpbtn { background: transparent; display: block; }
+        .spinner { display: none; }
+        .custom-issue { cursor: pointer; }
     </style>
 </head>
 <body class="container mt-4">
@@ -26,26 +26,25 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="questionSelect"></ul>
         </div>
+        <div class="spinner-border text-primary mt-2 spinner" id="loadingSpinner" role="status"></div>
     </div>
     
-    <div id="answer" class="alert alert-secondary">Wählen Sie eine Frage, um die Antwort zu sehen.</div>
+    <div id="answer" class="alert alert-info">Wählen Sie eine Frage, um die Antwort zu sehen.</div>
     
     <div class="mt-4">
-        <h2 class="text-secondary">Kein passendes Problem gefunden oder deine Antwort hat nicht geholfen?</h2>
-       
-        
-     
+        <h2 class="text-secondary">Kein passendes Problem gefunden?</h2>
+        <ul>
+            <li>Erik: erik.demoulin@atgmail.de</li>
+            <li>Elias: elias.ruediger@atgmail.de</li>
+            <li>Tayyib: tayyib.karis@atgmail.de</li>
+            <li>Herr Strauch: strauch@aggertal-gymnasium.de</li>
+            <li>Frau Meurer: meurer@aggertal-gymnasium.de</li>
+        </ul>
     </div>
-    <div id="contacts">
-        <h2>Deine Ansprechpartner:</h2>
-    <ul>
-        <li>Erik: erik.demoulin@atgmail.de</li>
-        <li>Elias: elias.ruediger@atgmail.de</li>
-        <li>Tayyib: tayyib.karis@atgmail.de</li>
-        <li>Herr Strauch: strauch@aggertal-gymnasium.de</li>
-        <li>Frau Meurer: meurer@aggertal-gymnasium.de</li>
-        
-    </ul>
+    
+    <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" id="rememberMe">
+        <label class="form-check-label" for="rememberMe">Remember Me</label>
     </div>
     
     <button onclick="showAdminPanel()" class="btn btn-dark mt-4">Admin Login</button>
@@ -53,13 +52,15 @@
     <div class="admin-panel mt-5" id="adminPanel">
         <h2>🔧 Admin Panel</h2>
         <p>Gelöste Probleme: <span id="solvedCount">0</span></p>
+        <h3>Custom Probleme</h3>
+        <ul id="customIssuesList" class="list-group"></ul>
         <canvas id="statsChart"></canvas>
     </div>
     
     <script>
         const questions = [
-            { question: "Meine Bücher laden nicht / ich habe Probleme bei der Anmeldung", answer: "Gehe zu [Bildungslogin](<https://bildungs-login.de>) > Klicke zum Medienregal > schulen2.MySchool BILDUNGSLOGIN > Gebe nun deine Daten ein, die du von deinen Lehrern erhalten hast " },
-            { question: "Wie installiere ich Apps?", answer: "Öffne den Schüler App Store und suche nach der gewünschten App. Klicke dann auf 'Laden'." },
+            { question: "Wie setze ich mein iPad zurück?", answer: "Gehe zu Einstellungen > Allgemein > Zurücksetzen." },
+            { question: "Wie installiere ich Apps?", answer: "Öffne den App Store und suche nach der gewünschten App." },
             { question: "Warum verbindet sich mein iPad nicht mit WLAN?", answer: "Überprüfe dein WLAN-Passwort und starte den Router neu." },
             { question: "Wie aktiviere ich den Dark Mode?", answer: "Einstellungen > Anzeige & Helligkeit > Dunkel." },
             { question: "Wie mache ich einen Screenshot?", answer: "Drücke gleichzeitig die Home-Taste und die Power-Taste." }
@@ -67,19 +68,25 @@
         
         let solvedCount = 0;
         const stats = {};
+        const customIssues = [];
         
         function populateQuestions() {
-            const dropdown = document.getElementById("questionSelect");
-            questions.forEach(q => {
-                const item = document.createElement("li");
-                const link = document.createElement("a");
-                link.className = "dropdown-item";
-                link.href = "#";
-                link.textContent = q.question;
-                link.onclick = () => showAnswer(q);
-                item.appendChild(link);
-                dropdown.appendChild(item);
-            });
+            document.getElementById("loadingSpinner").style.display = "block";
+            setTimeout(() => {
+                const dropdown = document.getElementById("questionSelect");
+                dropdown.innerHTML = "";
+                questions.forEach(q => {
+                    const item = document.createElement("li");
+                    const link = document.createElement("a");
+                    link.className = "dropdown-item";
+                    link.href = "#";
+                    link.textContent = q.question;
+                    link.onclick = () => showAnswer(q);
+                    item.appendChild(link);
+                    dropdown.appendChild(item);
+                });
+                document.getElementById("loadingSpinner").style.display = "none";
+            }, 1000);
         }
         
         function showAnswer(selectedQuestion) {
@@ -91,31 +98,23 @@
         function submitIssue() {
             const issue = document.getElementById("customIssue").value.trim();
             if (issue) {
-                alert("Wir werden uns mit Ihrem Problem befassen.");
+                customIssues.push(issue);
+                updateCustomIssuesList();
+                document.getElementById("customIssue").value = "";
                 solvedCount++;
                 document.getElementById("solvedCount").textContent = solvedCount;
-                document.getElementById("customIssue").value = "";
             }
         }
         
-        function updateChart() {
-            const ctx = document.getElementById("statsChart").getContext("2d");
-            new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: Object.keys(stats),
-                    datasets: [{
-                        label: "Anzahl Anfragen",
-                        data: Object.values(stats),
-                        backgroundColor: "rgba(75, 192, 192, 0.6)",
-                        borderColor: "rgba(75, 192, 192, 1)",
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: { y: { beginAtZero: true } }
-                }
+        function updateCustomIssuesList() {
+            const list = document.getElementById("customIssuesList");
+            list.innerHTML = "";
+            customIssues.forEach((issue, index) => {
+                const item = document.createElement("li");
+                item.className = "list-group-item custom-issue";
+                item.textContent = `Problem ${index + 1}: ${issue}`;
+                item.onclick = () => alert(`Details zu diesem Problem: ${issue}`);
+                list.appendChild(item);
             });
         }
         
@@ -129,12 +128,7 @@
         }
         
         populateQuestions();
-
-    
-        }
     </script>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
