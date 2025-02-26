@@ -28,11 +28,11 @@
         </div>
     </div>
     
-    <div id="answer" class="alert alert-warning">Wählen Sie eine Frage, um die Antwort zu sehen.</div>
+    <div id="answer" class="alert alert-secondary">Wählen Sie eine Frage, um die Antwort zu sehen.</div>
     
     <div class="mt-4">
         <h2 class="text-secondary">Kein passendes Problem gefunden oder deine Antwort hat nicht geholfen?</h2>
-        <button class="btn btn-secondary" onclick="nosolve()" id="helpbtn">Hilfe!</button>
+       
         
      
     </div>
@@ -57,11 +57,6 @@
     </div>
     
     <script>
-        window.onload = onload()
-        function onload() {
-            getElementById("contacts").style.display ="block";
-            getElementById("helpbtn").style.display ="none";
-        }
         const questions = [
             { question: "Meine Bücher laden nicht / ich habe Probleme bei der Anmeldung", answer: "Gehe zu [Bildungslogin](<https://bildungs-login.de>) > Klicke zum Medienregal > schulen2.MySchool BILDUNGSLOGIN > Gebe nun deine Daten ein, die du von deinen Lehrern erhalten hast " },
             { question: "Wie installiere ich Apps?", answer: "Öffne den Schüler App Store und suche nach der gewünschten App. Klicke dann auf 'Laden'." },
@@ -135,10 +130,7 @@
         
         populateQuestions();
 
-        function nosolve() {
-            getElementById("contacts").style.visibility ="visible";
-            getElementById("helpbtn").style.visibility ="hidden";
-            alert("Kontaktiere uns gerne über Teams!");
+    
         }
     </script>
     
